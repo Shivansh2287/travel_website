@@ -1,31 +1,59 @@
-import React from 'react';
-import '../../App.css';
-import Paper from "@material-ui/core/Paper";
-import { Container } from '@material-ui/core';
-import {Button} from "../../components/Button";
+import React, { useState, useEffect } from 'react'
+import Loading from './Loading'
+import Tours from './Tours'
+import '../../index.css'
+// ATTENTION!!!!!!!!!!
+// I SWITCHED TO PERMANENT DOMAIN
+const url = 'https://course-api.com/react-tours-project'
 
-export default function Services() {
+function App() {
+  const [loading, setLoading] = useState(true)
+  const [tours, setTours] = useState([])
+
+  const removeTour = (id) => {
+    const newTours = tours.filter((tour) => tour.id !== id)
+    setTours(newTours)
+  }
+
+  const fetchTours = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(url)
+      const tours = await response.json()
+      setLoading(false)
+      setTours(tours)
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    fetchTours()
+  }, [])
+  if (loading) {
+    return (
+      <main>
+        <Loading />
+      </main>
+    )
+  }
+  if (tours.length === 0) {
+    return (
+      <main>
+        <div className='title'>
+          <h2>no tours left</h2>
+          <button className='btn' onClick={() => fetchTours()}>
+            refresh
+          </button>
+        </div>
+      </main>
+    )
+  }
   return (
-  <div className="product-bg">
-  <Container>
-    <h1 style={{color: "white", fontSize: "100px"}}>SERVICES</h1>
-    <Paper elevation = {3} square>
-    <div className="center" style={{padding: "25px"}}>
-    <img src= {"https://images.unsplash.com/photo-1443927024987-129b3c966f5e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1510&q=80"} style={{height: "300px", width: "300px", }} />
-     <h3>Services Offered In This Package</h3>
-     <ul className="center">
-       <li>Feature #1</li>
-       <li>Feature #2</li>
-       <li>Feature #3</li>
-       <li>Feature #4</li>
-       <li>Feature #5</li>
-     </ul>
-     <div className="center">
-       <Button >Book Now</Button>
-     </div>
-     </div>
-  </Paper>
-  </Container>
-  </div>
-  );
+    <main>
+      <Tours tours={tours} removeTour={removeTour} />
+    </main>
+  )
 }
+
+export default App
